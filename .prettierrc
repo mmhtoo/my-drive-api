@@ -2,4 +2,6 @@
   "singleQuote": true,
   "trailingComma": "all",
   "semi": false,
+  "bracketSameLine": false,
+  "bracketSpacing": false
 }

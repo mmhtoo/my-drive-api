@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id String @id @default(uuid())
+  username String
+  email String @unique
+  password String
+  imageUrl String? @map("profile_image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  ownedNodes Node[] @relation("AccountHasOwnedNodes")
+
+  @@map("accounts")
+  @@index([id,email])
+}
+
+enum NodeType {
+  FILE
+  FOLDER
+}
+
+model Node {
+  id String @id @default(uuid())
+  name String 
+  type NodeType
+  parentId String? @map("parent_id")
+  parent Node? @relation("NodeHasParent", fields: [parentId], references: [id])
+  childNodes Node[] @relation("NodeHasParent")
+  size Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isArchived Boolean @default(false) @map("is_archived")
+  archivedAt DateTime? @map("archived_at")
+  
+  ownerAccountId String @map("owner_account_id")
+  ownerAccount Account @relation("AccountHasOwnedNodes", fields: [ownerAccountId], references: [id])
+
+  @@map("nodes")
+  @@index([id, ownerAccountId, name])
+}
