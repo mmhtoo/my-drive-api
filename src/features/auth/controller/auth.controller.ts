@@ -1,28 +1,28 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Header,
-  Post,
-} from '@nestjs/common'
+import {Body, Controller, HttpStatus, Post} from '@nestjs/common'
 import {SignUpDto} from '../dtos/signup.dto'
+import {SignInDto} from '../dtos/signin.dto'
+import AuthService from '../services/auth.service'
+import {dataResponse} from 'src/shared/utils/response-helper'
+import {Public} from 'src/configs/decorators'
 
 @Controller({
   version: '1',
   path: 'auth',
 })
 export default class AuthController {
-  constructor() {}
+  constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('signup')
-  signupAccount(@Body() signupDto: SignUpDto) {
-    console.log(signupDto)
-    throw new BadRequestException('Bad Request')
-    return 'signup'
+  async signupAccount(@Body() signUpDto: SignUpDto) {
+    const result = await this.authService.signUp(signUpDto)
+    return dataResponse(result, 'Successfully signed up!', HttpStatus.CREATED)
   }
 
+  @Public()
   @Post('signin')
-  signinAccount() {
-    return 'signin'
+  async signinAccount(@Body() signInDto: SignInDto) {
+    const result = await this.authService.signIn(signInDto)
+    return dataResponse(result, 'Success!', HttpStatus.OK)
   }
 }

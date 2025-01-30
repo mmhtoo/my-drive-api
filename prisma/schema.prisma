@@ -15,7 +15,8 @@ model Account {
   imageUrl String? @map("profile_image_url")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
+  hasVerified Boolean @default(false) @map("has_verified")
+  
   ownedNodes Node[] @relation("AccountHasOwnedNodes")
 
   @@map("accounts")
