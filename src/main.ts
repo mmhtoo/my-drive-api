@@ -29,6 +29,7 @@ function bootstrapSwaggerDocument(app: INestApplication<any>) {
     .setTitle('My Drive API')
     .setDescription('API Collection for My Drive Application.')
     .setVersion('1.0')
+    .addBearerAuth()
     .build()
   SwaggerModule.setup('api', app, () =>
     SwaggerModule.createDocument(app, config),
