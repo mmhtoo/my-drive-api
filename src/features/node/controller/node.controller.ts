@@ -3,46 +3,72 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
   Request,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common'
 import NodeService from '../services/node.service'
 import {ApiBearerAuth} from '@nestjs/swagger'
 import {CreateNodeDto} from '../dtos/create-node.dto'
 import {AppJwtPayload} from 'src/features/auth/mappers'
 import {GetNodesDto} from '../dtos/get-nodes.dto'
+import StorageService from 'src/shared/storage/storage.service'
+import {FileInterceptor} from '@nestjs/platform-express'
+import ParseJsonPipe from 'src/configs/pipes/parse-json.pipe'
+import {unlink} from 'fs'
+import {NodeType} from '../entities/node.entity'
 
 @Controller({
   version: '1',
   path: 'nodes',
 })
 export default class NodeController {
-  constructor(private readonly nodeService: NodeService) {}
+  constructor(
+    private readonly nodeService: NodeService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBearerAuth()
   async createNewNode(
-    @Body() createNodeDto: CreateNodeDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('data', new ParseJsonPipe(CreateNodeDto))
+    createNodeDto: string,
     @Request() req: any,
   ) {
     try {
+      const dto = createNodeDto as any as CreateNodeDto
       const reqUser = req.user as AppJwtPayload
+      let tempLink
+      // only type is FILE
       // upload to cloud storage or disk
+      if (dto.type === NodeType.FILE && file) {
+        tempLink = await this.storageService.upload({
+          filePath: file.path,
+          fileKey: `${reqUser.userId}/${file.filename}`,
+        })
+      }
+
       // save node record to db
       const result = await this.nodeService.createNode({
-        ...createNodeDto,
+        ...dto,
         ownerAccountId: reqUser.userId,
-        isHidden: createNodeDto.isHidden ?? false,
+        isHidden: dto.isHidden ?? false,
+        sourceLink: tempLink,
       })
+      // delete temp file, do not wait to finish, should send to queue
+      if (file) unlink(file.path, () => {})
       return {
         data: result,
       }
     } catch (e) {
-      console.log('Error at createNewNode', e)
       throw e
     }
   }
