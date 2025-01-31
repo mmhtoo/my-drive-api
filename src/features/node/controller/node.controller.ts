@@ -3,9 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -22,6 +25,7 @@ import {FileInterceptor} from '@nestjs/platform-express'
 import ParseJsonPipe from 'src/configs/pipes/parse-json.pipe'
 import {unlink} from 'fs'
 import {NodeType} from '../entities/node.entity'
+import {dataResponse} from 'src/shared/utils/response-helper'
 
 @Controller({
   version: '1',
@@ -138,6 +142,31 @@ export default class NodeController {
       }
     } catch (e) {
       console.log('Error at get Nodes ', e)
+      throw e
+    }
+  }
+
+  @Patch('/:id/archive-or-unarchive')
+  @ApiBearerAuth()
+  async archiveOrUnarchiveNode(
+    @Param('id', new ParseUUIDPipe({optional: false})) id: string,
+    @Query('isArchived', new ParseBoolPipe({})) isArchived: boolean,
+    @Request() req: any,
+  ) {
+    try {
+      const reqUser = req.user as AppJwtPayload
+      await this.nodeService.updateArchiveNode({
+        id,
+        ownerAccountId: reqUser.userId,
+        isArchived,
+      })
+      return dataResponse(
+        null,
+        isArchived ? 'Archived!' : 'Unarchived!',
+        HttpStatus.OK,
+      )
+    } catch (e) {
+      console.log('Error at archiveOrUnarchiveNode ', e)
       throw e
     }
   }
