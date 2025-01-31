@@ -18,6 +18,8 @@ export interface UpdateNodeByIdInput extends Partial<SaveNodeInput> {
   id: string
 }
 
+export interface FindInput extends Partial<Node> {}
+
 export default abstract class AbstractNodeRepository {
   abstract save(input: SaveNodeInput): Promise<Node | null>
   abstract findById(id: string, ownerAccountId?: string): Promise<Node | null>
@@ -27,4 +29,5 @@ export default abstract class AbstractNodeRepository {
   ): Promise<Array<Node> | null>
   abstract updateById(input: UpdateNodeByIdInput): Promise<Node | null>
   abstract deleteById(id: string): Promise<void>
+  abstract find(input: FindInput): Promise<Node[]>
 }

@@ -1,15 +1,22 @@
 import {Injectable} from '@nestjs/common'
 import AbstractNodeRepository, {
+  FindInput,
   SaveNodeInput,
   UpdateNodeByIdInput,
 } from '../abstract-node.repository'
 import {Node} from '../../entities/node.entity'
 import PrismaService from 'src/prisma/prisma.service'
-import {PrismaPromise} from '@prisma/client'
 
 @Injectable()
 export default class NodeRepositoryImpl implements AbstractNodeRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  async find(input: FindInput): Promise<Node[]> {
+    const result = await this.prismaService.node.findMany({
+      where: input,
+    })
+    return result || []
+  }
 
   save(input: SaveNodeInput): Promise<Node | null> {
     return this.prismaService.node.create({

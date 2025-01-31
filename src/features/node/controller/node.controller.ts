@@ -2,15 +2,18 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Request,
 } from '@nestjs/common'
 import NodeService from '../services/node.service'
 import {ApiBearerAuth} from '@nestjs/swagger'
 import {CreateNodeDto} from '../dtos/create-node.dto'
 import {AppJwtPayload} from 'src/features/auth/mappers'
+import {GetNodesDto} from '../dtos/get-nodes.dto'
 
 @Controller({
   version: '1',
@@ -61,6 +64,24 @@ export default class NodeController {
     } catch (e) {
       console.log('Error at forceDeleteNode ', e)
       throw e
+    }
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  async getNodes(@Query() searchQuery: GetNodesDto, @Request() req: any) {
+    try {
+      const reqUser = req.user as AppJwtPayload
+      const result = await this.nodeService.getNodes({
+        ownerAccountId: reqUser.userId,
+        parentId: searchQuery.parentId,
+        isIncludeHidden: searchQuery.isIncludeHidden ? undefined : false,
+      })
+      return {
+        data: result,
+      }
+    } catch (e) {
+      console.log('Error at get Nodes ', e)
     }
   }
 }

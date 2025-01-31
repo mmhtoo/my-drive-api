@@ -32,6 +32,12 @@ export interface DeleteNodeByIdInput {
   ownerAccountId: string
 }
 
+export interface GetNodesInput {
+  ownerAccountId: string
+  parentId?: string
+  isIncludeHidden?: boolean
+}
+
 @Injectable()
 export default class NodeService {
   constructor(private readonly nodeRepo: AbstractNodeRepository) {}
@@ -96,6 +102,23 @@ export default class NodeService {
       console.log('Error at forceDeleteNode', e)
       throw new CreateNodeException(
         e?.message || 'Failed to delete node!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  async getNodes(input: GetNodesInput): Promise<Node[]> {
+    try {
+      const result = await this.nodeRepo.find({
+        parentId: input.parentId,
+        ownerAccountId: input.ownerAccountId,
+        isHidden: input.isIncludeHidden,
+      })
+      return result || []
+    } catch (e) {
+      console.log('Error at getNodes', e)
+      throw new CreateNodeException(
+        e?.message || 'Failed to get nodes!',
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
