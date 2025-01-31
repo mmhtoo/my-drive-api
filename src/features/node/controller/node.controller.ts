@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   NotFoundException,
   Param,
   ParseUUIDPipe,
@@ -47,12 +46,14 @@ export default class NodeController {
       const dto = createNodeDto as any as CreateNodeDto
       const reqUser = req.user as AppJwtPayload
       let tempLink
+      let sourceRefKey = ''
       // only type is FILE
       // upload to cloud storage or disk
       if (dto.type === NodeType.FILE && file) {
+        sourceRefKey = `${reqUser.userId}/${file.filename}`
         tempLink = await this.storageService.upload({
           filePath: file.path,
-          fileKey: `${reqUser.userId}/${file.filename}`,
+          fileKey: sourceRefKey,
         })
       }
 
@@ -61,10 +62,12 @@ export default class NodeController {
         ...dto,
         ownerAccountId: reqUser.userId,
         isHidden: dto.isHidden ?? false,
-        sourceLink: tempLink,
+        sourceTempLink: tempLink,
+        sourceRefKey,
       })
       // delete temp file, do not wait to finish, should send to queue
       if (file) unlink(file.path, () => {})
+
       return {
         data: result,
       }
@@ -81,11 +84,16 @@ export default class NodeController {
   ) {
     try {
       const reqUser = req.user as AppJwtPayload
-      // delete from cloud storage or disk
       // delete node record from db
-      await this.nodeService.forceDeleteNode({
+      const deletedNode = await this.nodeService.forceDeleteNode({
         id,
         ownerAccountId: reqUser.userId,
+      })
+      // delete from cloud storage or disk
+      // TODO: needing to think about deleting folder with children files
+      // to delete with queue based
+      await this.storageService.delete({
+        refKey: deletedNode.sourceRefKey,
       })
       return
     } catch (e) {

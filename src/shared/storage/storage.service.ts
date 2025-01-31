@@ -7,6 +7,10 @@ export interface UploadInput {
   fileKey: string
 }
 
+export interface DeleteInput {
+  refKey: string
+}
+
 @Injectable()
 export default class StorageService {
   constructor(private readonly storageRepo: AbstractStorageRepository) {}
@@ -17,6 +21,15 @@ export default class StorageService {
       return result
     } catch (e) {
       console.log('Error at upload ', e)
+      throw e
+    }
+  }
+
+  async delete(input: DeleteInput): Promise<void> {
+    try {
+      await this.storageRepo.delete(input.refKey)
+    } catch (e) {
+      console.log('Error at delete ', e)
       throw e
     }
   }

@@ -57,12 +57,12 @@ export default class NodeRepositoryImpl implements AbstractNodeRepository {
     return result
   }
 
-  async deleteById(id: string): Promise<void> {
-    await this.prismaService.node.delete({
+  async deleteById(id: string): Promise<Node | null> {
+    const result = await this.prismaService.node.delete({
       where: {
         id,
       },
     })
-    return
+    return result || null
   }
 }

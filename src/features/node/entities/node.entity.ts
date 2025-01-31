@@ -17,5 +17,6 @@ export interface Node {
   isHidden: boolean
   extension: string
   ownerAccountId: string
-  sourceLink?: string
+  sourceTempLink?: string
+  sourceRefKey?: string
 }

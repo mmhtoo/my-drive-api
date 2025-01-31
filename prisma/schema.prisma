@@ -43,7 +43,8 @@ model Node {
   metadata String? @map("metadata")
   isHidden Boolean @default(false) @map("is_hidden")
   extension String? @map("extension")
-  sourceLink String? @map("source_link")
+  sourceTempLink String? @map("source_temp_link")
+  sourceRefKey String? @map("source_ref_key")
 
   ownerAccountId String @map("owner_account_id")
   ownerAccount Account @relation("AccountHasOwnedNodes", fields: [ownerAccountId], references: [id])

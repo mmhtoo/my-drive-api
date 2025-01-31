@@ -28,6 +28,6 @@ export default abstract class AbstractNodeRepository {
     ownerAccountId?: string,
   ): Promise<Array<Node> | null>
   abstract updateById(input: UpdateNodeByIdInput): Promise<Node | null>
-  abstract deleteById(id: string): Promise<void>
+  abstract deleteById(id: string): Promise<Node | null>
   abstract find(input: FindInput): Promise<Node[]>
 }

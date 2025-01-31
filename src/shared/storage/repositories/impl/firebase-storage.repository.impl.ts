@@ -26,7 +26,9 @@ export default class FirebaseStorageRepositoryImpl
     return url
   }
 
-  delete(keyName: string): Promise<void> {
-    throw new Error('Method not implemented.')
+  async delete(keyName: string): Promise<void> {
+    const storage = this.firebase.storage()
+    await storage.bucket().file(keyName).delete()
+    return
   }
 }

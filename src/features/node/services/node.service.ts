@@ -13,7 +13,8 @@ export interface CreateNodeInput {
   ownerAccountId: string
   metadata?: string
   size?: number
-  sourceLink?: string
+  sourceTempLink?: string
+  sourceRefKey?: string
 }
 
 export interface ArchiveNodeInput {
@@ -95,9 +96,9 @@ export default class NodeService {
     }
   }
 
-  async forceDeleteNode(input: DeleteNodeByIdInput): Promise<void> {
+  async forceDeleteNode(input: DeleteNodeByIdInput): Promise<Node | null> {
     try {
-      await this.nodeRepo.deleteById(input.id)
+      return await this.nodeRepo.deleteById(input.id)
     } catch (e) {
       console.log('Error at forceDeleteNode', e)
       throw new CreateNodeException(
