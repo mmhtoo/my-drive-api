@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
@@ -82,6 +83,28 @@ export default class NodeController {
       }
     } catch (e) {
       console.log('Error at get Nodes ', e)
+    }
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  async getNodeById(
+    @Param('id', new ParseUUIDPipe({optional: false})) id: string,
+    @Request() req: any,
+  ) {
+    try {
+      const reqUser = req.user as AppJwtPayload
+      const result = await this.nodeService.findNodeById({
+        id,
+        ownerAccountId: reqUser.userId,
+      })
+      if (!result) throw new NotFoundException('Node not found!')
+      return {
+        data: result,
+      }
+    } catch (e) {
+      console.log('Error at get Nodes ', e)
+      throw e
     }
   }
 }
