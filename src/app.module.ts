@@ -1,5 +1,4 @@
 import {Module} from '@nestjs/common'
-import {AppService} from './app.service'
 import AuthModule from './features/auth/auth.module'
 import {ConfigModule} from '@nestjs/config'
 import {APP_GUARD} from '@nestjs/core'
@@ -17,7 +16,6 @@ import UtilityModule from './features/utility/utility.module'
     UtilityModule,
   ],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtGuard,

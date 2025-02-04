@@ -68,6 +68,8 @@ export default class NodeController {
         isHidden: dto.isHidden ?? false,
         sourceTempLink: tempLink,
         sourceRefKey,
+        extension: file?.mimetype || undefined,
+        size: file?.size || undefined,
       })
       // delete temp file, do not wait to finish, should send to queue
       if (file) unlink(file.path, () => {})

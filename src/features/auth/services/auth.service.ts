@@ -5,6 +5,7 @@ import {ConfigService} from '@nestjs/config'
 import * as bcrypt from 'bcrypt'
 import {JwtService} from '@nestjs/jwt'
 import {mapAccountToJwtPayload, mapAccountToSignUpOutput} from '../mappers'
+import RefreshTokenService from './refresh-token.service'
 
 type SignUpInput = {
   email: string
@@ -38,6 +39,7 @@ export default class AuthService {
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async signUp(input: SignUpInput): Promise<SignUpOutput> {
@@ -79,9 +81,11 @@ export default class AuthService {
       }
 
       const accessToken = this.jwtService.sign(mapAccountToJwtPayload(result))
-
+      const generatedRefreshToken =
+        await this.refreshTokenService.createNewToken(result.id)
+      const refreshToken = generatedRefreshToken.token
       return {
-        refreshToken: 'refreshToken',
+        refreshToken,
         accessToken,
       }
     } catch (e) {

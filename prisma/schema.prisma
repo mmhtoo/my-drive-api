@@ -18,6 +18,7 @@ model Account {
   hasVerified Boolean @default(false) @map("has_verified")
   
   ownedNodes Node[] @relation("AccountHasOwnedNodes")
+  refreshTokens RefreshToken[] @relation("AccountHasRefreshTokens")
 
   @@map("accounts")
   @@index([id,email])
@@ -51,4 +52,17 @@ model Node {
 
   @@map("nodes")
   @@index([id, ownerAccountId, name])
+}
+
+model RefreshToken {
+  id Int @id @default(autoincrement())
+  token String @unique
+  hasClaimed Boolean @default(false) @map("has_claimed") // status of token, has already used or not
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  accountId String @map("account_id")
+  account Account @relation("AccountHasRefreshTokens", fields: [accountId], references: [id])
+
+  @@map("refresh_tokens")
+  @@index([id, accountId, token])
 }

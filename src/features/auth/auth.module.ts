@@ -9,6 +9,9 @@ import {PassportModule} from '@nestjs/passport'
 import JwtStrategy from './strategies/jwt.strategy'
 import {JwtModule} from '@nestjs/jwt'
 import {ConfigService} from '@nestjs/config'
+import AbstractRefreshTokenRepository from './repository/abstract-refresh-token.repository'
+import RefreshTokenRepositoryImpl from './repository/impl/refresh-token.repository.impl'
+import RefreshTokenService from './services/refresh-token.service'
 
 @Module({
   imports: [
@@ -35,6 +38,11 @@ import {ConfigService} from '@nestjs/config'
     },
     AccountService,
     JwtStrategy,
+    {
+      provide: AbstractRefreshTokenRepository,
+      useClass: RefreshTokenRepositoryImpl,
+    },
+    RefreshTokenService,
   ],
 })
 export default class AuthModule {}
