@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Post,
   Request,
@@ -16,6 +17,9 @@ import {Request as ExpressReq} from 'express'
 import {AppJwtPayload} from '../mappers'
 import AccountService from '../services/account.service'
 import {mapAccountToDto} from '../mappers/mapAccountEntityToDto'
+import {RefreshTokenDto} from '../dtos/refresh-token.dto'
+import {JwtService} from '@nestjs/jwt'
+import RefreshTokenService from '../services/refresh-token.service'
 
 @Controller({
   version: '1',
@@ -25,6 +29,7 @@ export default class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly accountService: AccountService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   @Public()
@@ -49,5 +54,20 @@ export default class AuthController {
     }
     const userData = await this.accountService.findAccountById(reqUser.userId)
     return dataResponse(mapAccountToDto(userData), 'Success!', HttpStatus.OK)
+  }
+
+  @Public()
+  @Post('refresh-token')
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    try {
+      const result = await this.refreshTokenService.refreshToken(
+        dto.refreshToken,
+        dto.accessToken,
+      )
+      return dataResponse(result, 'Success!', HttpStatus.OK)
+    } catch (e) {
+      console.log('Error at refreshToken ', e)
+      throw e
+    }
   }
 }

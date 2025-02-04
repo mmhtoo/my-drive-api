@@ -28,7 +28,7 @@ export default class RefreshTokenRepositoryImpl
       },
       data: {
         token: input.refreshToken,
-        ...input,
+        hasClaimed: input.hasClaimed,
       },
     })
   }

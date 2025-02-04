@@ -6,11 +6,20 @@ import {RefreshToken} from '../entities/refresh-token.entity'
 import {PrismaClientKnownRequestError} from '@prisma/client/runtime/library'
 import {randomUUID} from 'crypto'
 import DuplicateRefreshTokenException from '../exceptions/duplicate-refresh-token.exception'
+import {InvalidCredentialsException} from '../exceptions/invalid-credentials.exceptionn'
+import {JwtService} from '@nestjs/jwt'
+import {AppJwtPayload} from '../mappers'
+
+export interface RefreshTokenOutput {
+  refreshToken: string
+  accessToken: string
+}
 
 @Injectable()
 export default class RefreshTokenService {
   constructor(
     private readonly refreshTokenRepo: AbstractRefreshTokenRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createNewToken(accountId: string): Promise<RefreshToken> {
@@ -50,5 +59,38 @@ export default class RefreshTokenService {
   async deleteHasClaimedTokens(): Promise<void> {
     await this.refreshTokenRepo.deleteHasClaimedTokens()
     return
+  }
+
+  async refreshToken(
+    refreshToken: string,
+    accessToken: string,
+  ): Promise<RefreshTokenOutput> {
+    const decodedToken = this.jwtService.decode(accessToken) as AppJwtPayload
+    const result = await this.findByTokenAndAccountId(
+      refreshToken,
+      decodedToken.userId,
+    )
+    if (!result || result.hasClaimed) {
+      throw new InvalidCredentialsException('Invalid token to refresh!')
+    }
+    const newAccessToken = this.jwtService.sign({
+      userId: decodedToken.userId,
+      username: decodedToken.username,
+      email: decodedToken.email,
+      imageUrl: decodedToken.imageUrl,
+    })
+    // create new
+    const newRefreshToken = await this.createNewToken(decodedToken.userId)
+    // update token as claimed
+    this.updateTokenAsClaimed({
+      id: result.id,
+      refreshToken: result.token,
+      ...result,
+      hasClaimed: true,
+    })
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken.token,
+    }
   }
 }
