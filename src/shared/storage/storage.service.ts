@@ -1,5 +1,7 @@
 import {Injectable} from '@nestjs/common'
-import AbstractStorageRepository from './repositories/abstract-storage.repostitory'
+import AbstractStorageRepository, {
+  UpdateInput,
+} from './repositories/abstract-storage.repostitory'
 
 export interface UploadInput {
   filePath: string
@@ -30,6 +32,24 @@ export default class StorageService {
       await this.storageRepo.delete(input.refKey)
     } catch (e) {
       console.log('Error at delete ', e)
+      throw e
+    }
+  }
+
+  async update(input: UpdateInput): Promise<string> {
+    try {
+      return await this.storageRepo.update(input)
+    } catch (e) {
+      console.log('Error at update ', e)
+      throw e
+    }
+  }
+
+  async generateSignedUrl(input: any): Promise<string> {
+    try {
+      return await this.storageRepo.generateSignedUrl(input)
+    } catch (e) {
+      console.log('Error at generateSignedUrl ', e)
       throw e
     }
   }

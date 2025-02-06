@@ -1,4 +1,3 @@
-import {PrismaPromise} from '@prisma/client'
 import {Node, NodeType} from '../entities/node.entity'
 
 export interface SaveNodeInput {
@@ -10,7 +9,8 @@ export interface SaveNodeInput {
   ownerAccountId: string
   metadata?: string
   size?: number
-  sourceLink?: string
+  sourceTempLink?: string
+  sourceRefKey?: string
   isArchived?: boolean
 }
 

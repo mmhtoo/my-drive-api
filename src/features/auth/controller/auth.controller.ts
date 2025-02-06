@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpStatus,
   Post,
   Request,
@@ -18,7 +17,6 @@ import {AppJwtPayload} from '../mappers'
 import AccountService from '../services/account.service'
 import {mapAccountToDto} from '../mappers/mapAccountEntityToDto'
 import {RefreshTokenDto} from '../dtos/refresh-token.dto'
-import {JwtService} from '@nestjs/jwt'
 import RefreshTokenService from '../services/refresh-token.service'
 
 @Controller({

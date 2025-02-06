@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common'
+import {Injectable, NotFoundException} from '@nestjs/common'
 import AbstractNodeRepository, {
   FindInput,
   SaveNodeInput,
@@ -6,6 +6,7 @@ import AbstractNodeRepository, {
 } from '../abstract-node.repository'
 import {Node} from '../../entities/node.entity'
 import PrismaService from 'src/prisma/prisma.service'
+import {Prisma} from '@prisma/client'
 
 @Injectable()
 export default class NodeRepositoryImpl implements AbstractNodeRepository {
@@ -58,11 +59,19 @@ export default class NodeRepositoryImpl implements AbstractNodeRepository {
   }
 
   async deleteById(id: string): Promise<Node | null> {
-    const result = await this.prismaService.node.delete({
-      where: {
-        id,
-      },
-    })
-    return result || null
+    try {
+      const result = await this.prismaService.node.delete({
+        where: {
+          id,
+        },
+      })
+      return result || null
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new NotFoundException('Node not found to delete!')
+        }
+      }
+    }
   }
 }

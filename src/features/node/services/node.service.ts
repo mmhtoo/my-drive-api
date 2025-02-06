@@ -1,8 +1,11 @@
 import {HttpStatus, Injectable} from '@nestjs/common'
-import AbstractNodeRepository from '../repositories/abstract-node.repository'
+import AbstractNodeRepository, {
+  UpdateNodeByIdInput,
+} from '../repositories/abstract-node.repository'
 import {Node, NodeType} from '../entities/node.entity'
 import {CreateNodeException} from '../exceptions/create-node.exception'
 import {InvalidParentException} from '../exceptions/invalid-parent.exception'
+import {Prisma} from '@prisma/client'
 
 export interface CreateNodeInput {
   name: string
@@ -120,6 +123,19 @@ export default class NodeService {
       console.log('Error at getNodes', e)
       throw new CreateNodeException(
         e?.message || 'Failed to get nodes!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  async updateNode(input: UpdateNodeByIdInput): Promise<Node | null> {
+    try {
+      const result = await this.nodeRepo.updateById(input)
+      return result || null
+    } catch (e) {
+      console.log('Error at updateNode', e)
+      throw new CreateNodeException(
+        e?.message || 'Failed to update node!',
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
