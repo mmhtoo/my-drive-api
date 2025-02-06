@@ -20,6 +20,9 @@ model Account {
   ownedNodes Node[] @relation("AccountHasOwnedNodes")
   refreshTokens RefreshToken[] @relation("AccountHasRefreshTokens")
 
+  myShares Share[] @relation("AccountHasShares")
+  otherShares Share[] @relation("ShareAllowAccounts")
+
   @@map("accounts")
   @@index([id,email])
 }
@@ -50,6 +53,8 @@ model Node {
   ownerAccountId String @map("owner_account_id")
   ownerAccount Account @relation("AccountHasOwnedNodes", fields: [ownerAccountId], references: [id])
 
+  shares Share[] @relation("NodeHasShares")
+
   @@map("nodes")
   @@index([id, ownerAccountId, name])
 }
@@ -65,4 +70,20 @@ model RefreshToken {
 
   @@map("refresh_tokens")
   @@index([id, accountId, token])
+}
+
+model Share {
+  id String @id @default(uuid())
+  nodeId String @map("node_id") 
+  node Node @relation("NodeHasShares", fields: [nodeId], references: [id], onDelete: Cascade)
+  ownerAccountId String @map("account_id")
+  ownerAccount Account @relation("AccountHasShares", fields: [ownerAccountId], references: [id], onDelete: Cascade)
+
+  allowAnyOne Boolean @default(false) @map("allow_anyone")
+  allowedAccounts Account[] @relation("ShareAllowAccounts")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("shares")
 }

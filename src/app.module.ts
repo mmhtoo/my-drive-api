@@ -5,6 +5,7 @@ import {APP_GUARD} from '@nestjs/core'
 import JwtGuard from './features/auth/guards/jwt.guard'
 import NodeModule from './features/node/node.module'
 import UtilityModule from './features/utility/utility.module'
+import ShareModule from './features/share/share.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import UtilityModule from './features/utility/utility.module'
     }),
     NodeModule,
     UtilityModule,
+    ShareModule,
   ],
   providers: [
     {
