@@ -41,5 +41,6 @@ import {ConfigService} from '@nestjs/config'
       useClass: NodeRepositoryImpl,
     },
   ],
+  exports: [NodeService],
 })
 export default class NodeModule {}

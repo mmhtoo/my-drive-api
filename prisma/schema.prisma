@@ -21,7 +21,7 @@ model Account {
   refreshTokens RefreshToken[] @relation("AccountHasRefreshTokens")
 
   myShares Share[] @relation("AccountHasShares")
-  otherShares Share[] @relation("ShareAllowAccounts")
+  accountToShares AccountsToShares[] @relation("AccountHasShares")
 
   @@map("accounts")
   @@index([id,email])
@@ -80,10 +80,23 @@ model Share {
   ownerAccount Account @relation("AccountHasShares", fields: [ownerAccountId], references: [id], onDelete: Cascade)
 
   allowAnyOne Boolean @default(false) @map("allow_anyone")
-  allowedAccounts Account[] @relation("ShareAllowAccounts")
+  accountToShares AccountsToShares[] @relation("ShareAllowAccounts")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("shares")
+}
+
+model AccountsToShares {
+  accountId String @map("account_id")
+  shareId String @map("share_id")
+
+  account Account @relation("AccountHasShares", fields: [accountId], references: [id], onDelete: Cascade)
+  share Share @relation("ShareAllowAccounts", fields: [shareId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("accounts_to_shares") 
+  @@id([accountId, shareId])
 }
